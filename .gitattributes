@@ -1,0 +1,4 @@
+# Treat dataset CSVs as text for correct diffing, and mark them so they're
+# excluded from GitHub's language statistics and linguist-generated diffs
+# (they're generated/derived data, not hand-authored source).
+data/*.csv text diff=csv linguist-generated=true
