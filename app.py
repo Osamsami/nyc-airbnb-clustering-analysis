@@ -11,6 +11,7 @@ Run with: streamlit run app.py
 
 from pathlib import Path
 
+import matplotlib.pyplot as plt
 import pandas as pd
 import streamlit as st
 
@@ -140,3 +141,67 @@ with right:
         .sort_values("avg_price")
     )
     st.dataframe(summary, use_container_width=True)
+
+# ---------------------------------------------------------------------------
+# Room type mix per cluster
+# ---------------------------------------------------------------------------
+st.subheader("Room type mix per cluster")
+room_mix = (
+    pd.crosstab(filtered["cluster_label"], filtered["room_type"], normalize="index") * 100
+).round(1)
+st.bar_chart(room_mix)
+
+st.divider()
+
+# ---------------------------------------------------------------------------
+# Scatter plot: listings colored by cluster
+# ---------------------------------------------------------------------------
+st.subheader("Listings map (colored by cluster)")
+
+if {"latitude", "longitude"}.issubset(filtered.columns):
+    fig, ax = plt.subplots(figsize=(8, 7))
+    # Sample for rendering performance on large filtered sets.
+    plot_df = filtered if len(filtered) <= 8000 else filtered.sample(8000, random_state=42)
+    for cluster_id, label in CLUSTER_LABELS.items():
+        cluster_points = plot_df[plot_df["cluster"] == cluster_id]
+        if cluster_points.empty:
+            continue
+        ax.scatter(
+            cluster_points["longitude"],
+            cluster_points["latitude"],
+            s=6,
+            alpha=0.5,
+            color=CLUSTER_COLORS.get(cluster_id, "#999999"),
+            label=label,
+        )
+    ax.set_xlabel("Longitude")
+    ax.set_ylabel("Latitude")
+    ax.set_title("NYC Airbnb listings by cluster")
+    ax.legend(markerscale=3, loc="best", fontsize=8)
+    st.pyplot(fig)
+    if len(filtered) > 8000:
+        st.caption(f"Showing a random sample of 8,000 of {len(filtered):,} matching listings for rendering performance.")
+else:
+    st.info("latitude/longitude columns not found in the dataset — showing price vs. minimum nights instead.")
+    fig, ax = plt.subplots(figsize=(8, 7))
+    for cluster_id, label in CLUSTER_LABELS.items():
+        cluster_points = filtered[filtered["cluster"] == cluster_id]
+        if cluster_points.empty:
+            continue
+        ax.scatter(
+            cluster_points["minimum_nights"],
+            cluster_points["price"],
+            s=6,
+            alpha=0.5,
+            color=CLUSTER_COLORS.get(cluster_id, "#999999"),
+            label=label,
+        )
+    ax.set_xlabel("Minimum nights")
+    ax.set_ylabel("Price ($)")
+    ax.legend(markerscale=3, loc="best", fontsize=8)
+    st.pyplot(fig)
+
+st.caption(
+    "Data: NYC Airbnb 2019 listings, clustered with K-Means (K=4, "
+    "silhouette ≈ 0.262). See reports/analysis.md for the full methodology."
+)
