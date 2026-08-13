@@ -2,3 +2,4 @@
 # excluded from GitHub's language statistics and linguist-generated diffs
 # (they're generated/derived data, not hand-authored source).
 data/*.csv text diff=csv linguist-generated=true
+*.ipynb linguist-generated=true
