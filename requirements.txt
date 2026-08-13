@@ -1,5 +1,7 @@
 pandas==3.0.5
-numpy==2.5.2
+# Keep in sync with the "Set up Python" version in .github/workflows/ci.yml —
+# numpy 2.5.0+ requires Python >=3.12.
+numpy==2.4.6
 scikit-learn==1.9.0
 matplotlib==3.11.1
 seaborn==0.13.2
