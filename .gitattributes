@@ -2,4 +2,7 @@
 # excluded from GitHub's language statistics and linguist-generated diffs
 # (they're generated/derived data, not hand-authored source).
 data/*.csv text diff=csv linguist-generated=true
+
+# Same reasoning as above: exclude notebooks from the language bar so it
+# reflects the Python source in app.py rather than notebook JSON overhead.
 *.ipynb linguist-generated=true
